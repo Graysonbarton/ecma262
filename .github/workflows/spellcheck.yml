@@ -1,14 +1,19 @@
-name: 'enforce format'
+name: 'ecma-262'
 
 on: [pull_request]
 
 jobs:
-  build:
-    name: 'enforce format'
+  spellcheck:
+    name: 'check for newly-introduced spelling errors'
     runs-on: ubuntu-22.04
 
     steps:
+      - run: sudo apt-get install aspell
       - uses: actions/checkout@v4
+        with:
+          # Number of commits to fetch. 0 indicates all history for all branches and tags.
+          # Default: 1
+          fetch-depth: 0
       - uses: ljharb/actions/node/install@6bc39109c48f74895ad72ec03ca0bb4e4da2fa3f
         name: 'nvm install lts/* && npm ci --no-audit'
         env:
@@ -16,4 +21,4 @@ jobs:
         with:
           node-version: lts/*
           use-npm-ci: true
-      - run: 'if ! npx emu-format --check spec.html; then echo "You need to run \`npm run format\`"; exit 1; fi'
+      - run: node scripts/spellcheck.mjs origin/"${GITHUB_BASE_REF}"
